@@ -1,0 +1,66 @@
+html,
+body {
+  /* overflow-x: hidden; Prevent scroll on narrow devices */
+  background-color: #E5E9F2 !important;
+}
+
+body {
+  padding-top: 56px;
+}
+
+.simpan {
+  background-color: #47525E;
+}
+
+.ubahpswd .simpan {
+}
+
+h3 {
+  color: #47525E;
+  font-family: Lato;
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
+  
+}
+
+.ubahpswd h3{
+  margin-top: 10px;
+}
+
+.form-group label{
+  color: #47525E;
+  font-family: Lato;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.data img {
+  align-content: center !important;
+}
+
+h5{
+  color: #8190A5;
+  font-family: Lato;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 20px;
+}
+
+h5 a{
+  color: #8190A5;
+}
+
+h5 a:hover{
+  color: #8190A5;
+  text-decoration: none;
+}
+
+
+
+@media (min-width: 991.98px) {
+  h3 {
+    text-align: left;
+  }
+
+}

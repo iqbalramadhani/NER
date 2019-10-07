@@ -1,0 +1,18 @@
+.nav-link {
+	height: 100%;
+	margin-left: 10px;
+	margin-right: 10px;
+	color: #47525E;
+	font-family: Lato;
+	font-size: 18px;
+	font-weight: 400;
+	text-align: center;
+}
+
+.nav-link:hover {
+	/* height: 100%; */
+	/* padding-top: -50px;
+	padding-bottom: 30px; */
+	z-index: 1;
+	background-color: #E5E9F2;
+}

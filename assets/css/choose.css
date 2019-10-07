@@ -1,0 +1,100 @@
+html,
+body {
+	/* overflow-x: hidden; Prevent scroll on narrow devices */
+	background-color: #E5E9F2 !important;
+}
+
+body {
+	padding-top: 56px;
+}
+
+.simpan {
+	background-color: #47525E;
+}
+
+
+h3 {
+	color: #47525E;
+	font-family: Lato;
+	font-size: 30px;
+	font-weight: 700;
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+
+
+main h5 {
+	color: #8190A5;
+	font-family: Lato;
+	font-size: 18px;
+	font-weight: 700;
+	margin-top: 100px;
+}
+
+main h5 a {
+	color: #8190A5;
+}
+
+main h5 a:hover {
+	color: #8190A5;
+	text-decoration: none;
+}
+
+.col-lg-7 {
+	margin-left: 30px;
+}
+
+.judul {
+	background-color: #F5F5F5;
+	border: 1px solid #8492A6;
+}
+
+table {
+	color: #47525E;
+	font-family: Lato;
+	/* font-size: 26px;
+	font-weight: 400; */
+}
+
+table .no {
+	padding: 0px !important;
+}
+
+table tfoot td {
+	background-color: #FFBA5C;
+
+}
+
+table tbody h6 {
+	font-size: 20px !important;
+}
+
+table tfoot td .tambah {
+	background-color: #FFBA5C;
+	color: #47525E;
+	font-family: Lato;
+	font-size: 26px;
+	font-weight: 700;
+
+}
+
+.semester {
+	width: 100px;
+}
+
+.col-lg-9 {
+	margin-left: 30px;
+}
+
+#wilayah1 tr .ptn-judul {
+	background-color: #47525E;
+	border-radius: 5px;
+}
+
+@media (min-width: 991.98px) {
+	h3 {
+		text-align: left;
+	}
+
+}

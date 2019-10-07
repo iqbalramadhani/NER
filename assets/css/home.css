@@ -1,0 +1,132 @@
+html,
+body {
+	/* overflow-x: hidden; Prevent scroll on narrow devices */
+	background-color: #E5E9F2 !important;
+}
+
+body {
+	padding-top: 56px;
+}
+
+main {
+	font-family: Lato;
+}
+
+main .profil h3 {
+	font-size: 30px;
+	font-weight: 700;
+	color: #47525E;
+}
+
+main .profil p {
+	font-size: 18px;
+	font-weight: 400;
+	color: #8190A5;
+}
+
+main .address h6 {
+	color: #8190A5;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+main .content {
+	background-color: rgba(243, 243, 243, 0.78);
+}
+
+main .content h3 {
+	color: #47525E;
+	font-family: Lato;
+	font-size: 30px;
+	font-weight: 700;
+	text-align: center;
+	padding: 20px 0px 70px 0px;
+
+}
+
+.menu {
+	padding: 25px 20px 20px;
+}
+
+.menu a:hover {
+	text-decoration: none;
+}
+
+.menu h5 {
+	color: #8190A5;
+	font-family: Lato;
+	font-size: 18px;
+	font-weight: 700;
+	margin-top: 300px;
+}
+
+.menu h5 a {
+	color: #8190A5;
+}
+
+.not {
+	margin-top: 35px;
+	font-size: 60px;
+}
+
+.menu h5 a:hover {
+	color: #8190A5;
+	text-decoration: none;
+}
+
+.lingkaran {
+	background-color: #969FAA;
+	border-radius: 100%;
+	width: 72px;
+	height: 72px;
+	margin-top: 40px;
+}
+
+.lingkaran-blue {
+	background-color: #00A6FF;
+	border-radius: 100%;
+	width: 72px;
+	height: 72px;
+	margin-top: 40px;
+}
+
+.menu .lingkaran,
+.lingkaran-blue h1 {
+	color: #FFFFFF;
+	font-family: Lato;
+	font-size: 30px;
+	font-weight: 700;
+	letter-spacing: 8px;
+	line-height: 51px;
+	/* width: 56px; */
+	text-align: center;
+	padding-left: 10px;
+	/* margin : 0px 20px 0px 20px; */
+}
+
+.oi-circle-x {
+	width: 50px;
+	height: 50px;
+
+}
+
+.lingkaran-blue h1 {
+	padding-top: 15px;
+}
+
+.outline-finalisai {
+	margin-top: 20px;
+	margin-right: 10px;
+	width: 192px;
+}
+
+@media (min-width: 991.98px) {
+	main .content h3 {
+		padding: 10px 0px 50px 0px;
+	}
+
+	.menu .col-lg .content {
+		width: 296px;
+		height: 228px;
+	}
+}

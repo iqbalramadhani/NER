@@ -1,0 +1,91 @@
+html,
+body {
+	/* overflow-x: hidden; Prevent scroll on narrow devices */
+	background-color: #E5E9F2 !important;
+}
+
+body {
+	padding-top: 56px;
+}
+
+main {
+	font-family: Lato;
+	/* background-color: #00A6FF !importants; */
+}
+
+.judul {
+	color: #47525E;
+	font-family: Lato;
+	font-size: 30px;
+	font-weight: 700;
+}
+
+.judul-inverse {
+	color: #dddddd;
+	font-family: Lato;
+	font-size: 30px;
+	font-weight: 700;
+}
+
+.user {
+	color: #FFFFFF;
+	font-family: Lato;
+	font-size: 30px;
+	font-weight: 400;
+}
+
+.biografi {
+	color: #FFFFFF;
+	font-family: Lato;
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 28px;
+}
+
+.judul,
+.user,
+.biografi {
+	text-align: center;
+}
+
+.no_pilihan {
+	color: #CCD1D7;
+	font-family: Lato;
+	font-size: 80px;
+	font-weight: 700;
+}
+
+.kotak {
+	border-radius: 12px;
+	/* width: 408px;
+	height: 167px; */
+}
+
+.rapor {
+	min-height: 400px;
+}
+
+.footer {
+	padding-top: 100px;
+	color: #8190A5;
+	font-family: Lato;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.footer a {
+	color: #8190A5;
+}
+
+.footer a:hover {
+	text-decoration: none;
+}
+
+@media (min-width: 991.98px) {
+
+	.judul,
+	.user,
+	.biografi {
+		text-align: left;
+	}
+}
