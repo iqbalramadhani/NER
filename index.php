@@ -1,6 +1,8 @@
 <?php
 include('Praproses.php');
+include('Svm.php');
 $praproses = new Praproses();
+$svm = new Svm();
 ?>
 <!DOCTYPE html>
 <html>
@@ -62,118 +64,134 @@ $praproses = new Praproses();
       </div>
       <?php
       $fh = fopen("data_training.txt", "r");
-      // $file = file_get_contents("data_training.txt");
-      // echo $file;
-      // print_r($init);
-      $data = array();
-      $isi = array();
+      $kamus = array();
+      $token = array();
       while (!feof($fh)) {
         $line = fgets($fh);
-        // echo strlen($line);
-        // echo $line . "<br>";
-        // if ($line == "  ") {
-        //   continue;
-        // }
-        $init = array_fill(0, 15, 0);
         $parts = explode(' ', $line);
-        // echo $parts[2] . "<br>";
         $asci = unpack("C*", $parts[0]);
-        if ($asci[1] == 13) {
+        if ($asci[1] == 13)
           continue;
-        }
-        // array_pop($asci);
-        $i = 0;
-        foreach ($asci as $s) {
-          $init[$i] = $s;
-          $i++;
-        }
-        $isi['kata'] = $parts[0];
-        $isi['asci'] = $init;
+        if (!in_array($parts[0], $kamus))
+          array_push($kamus, $parts[0]);
         $kelas = trim($parts[2]);
-        $isi['kelas'] = $praproses->kelas($kelas);
-        $isi['label'] = $kelas;
-        array_push($data, $isi);
+        array_push($token, [$parts[0], $kelas]);
       }
-
-      $positif = array();
-      $negatif = array();
-      $baru = array();           //nyimpen data
-      $kelas = array();         //nyimpen class
-      foreach ($data as $d) {
-        if ($d['kelas'] == 1) {
-          $d['kelas'] = -1;
-          array_push($positif, $d);
-          array_push($baru, $d['asci']);
-          array_push($kelas, $d['kelas']);
-        } else if ($d['kelas'] == 2) {
-          $d['kelas'] = 1;
-          array_push($negatif, $d);
-          array_push($baru, $d['asci']);
-          array_push($kelas, $d['kelas']);
-        }
-      }
-
-      // echo "<pre>";
-      // print_r($data);
-      // echo "</pre>";
-
-
-      include('Svm.php');   //memanggil class svm
-
-      $uji = [
-        [0, 74, 111, 107, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 66, 97, 100, 97, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      ];
-
-      $svm = new Svm();
-      $svm->pelatihan($baru, $kelas);
-      // $uji = $data[15]['asci'];
-      // print_r($uji);
-      // $uji = [-0.44, -0.42, 0.27, 1, 1];
-      // print_r($uji);
-      $prediksi = $svm->prediksi($uji);
-      var_dump($prediksi);
       ?>
-      <table class="table" id="example">
-        <thead>
-          <tr>
-            <th rowspan="2">No</th>
-            <th rowspan="2">Kata</th>
-            <th colspan="15">ASCI</th>
-            <th rowspan="2">Kelas</th>
-          </tr>
-          <tr>
+
+      <h4>Kamus Yang Terbentuk</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <th>No</th>
             <?php
-            for ($i = 0; $i < 15; $i++) {
+            $no = 1;
+            foreach ($kamus as $k) {
               ?>
-              <th><?= $i + 1; ?></th>
+              <td><?= $no++ ?></td>
             <?php
-            } ?>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-          $no = 1;
-          foreach ($data as $d) {
+            }
             ?>
+          </thead>
+          <tbody>
             <tr>
-              <td><?= $no++; ?></td>
-              <td><?= $d['kata']; ?></td>
+              <th>Kata</th>
               <?php
-                foreach ($d['asci'] as $a) {
-                  ?>
-                <td><?= $a; ?></td>
-              <?php
-                }
+              foreach ($kamus as $k) {
                 ?>
-              <td><?= $d['label']; ?></td>
+                <td><?= $k ?></td>
+              <?php
+              }
+              ?>
             </tr>
-          <?php
-          }
-          ?>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="pt-5">One Hot</h4>
+      <?php
+      $i = 0;
+      $token_baru = array();
+      foreach ($token as $t) {
+        $vektor = array();
+        foreach ($kamus as $k) {
+          if ($t[0] == $k)
+            array_push($vektor, 1);
+          else
+            array_push($vektor, 0);
+        }
+        array_push($token_baru, [$t[0], $vektor, $t[1]]);
+        $i++;
+      }
+      // echo '<pre>';
+      // print_r($token_baru);
+      // echo '</pre>';
+      ?>
+      <div class="table-responsive">
+        <table class="table example">
+          <thead>
+            <th>No.</th>
+            <th>Kata</th>
+            <th>Vektor</th>
+            <th>Class</th>
+          </thead>
+          <tbody>
+            <?php
+            $ORGANIZATION = array();
+            $PERSON = array();
+            $QUANTITY = array();
+            $LOCATION = array();
+            $TIME = array();
+            $OTHER = array();
+            $no = 1;
+            foreach ($token_baru as $tb) {
+              switch ($tb[2]) {
+                case "ORGANIZATION":
+                  array_push($ORGANIZATION, [$tb[1], $tb[2]]);
+                  break;
+                case 'PERSON':
+                  array_push($PERSON, [$tb[1], $tb[2]]);
+                  break;
+                case 'QUANTITY':
+                  array_push($QUANTITY, [$tb[1], $tb[2]]);
+                  break;
+                case 'LOCATION':
+                  array_push($LOCATION, [$tb[1], $tb[2]]);
+                  break;
+                case 'TIME':
+                  array_push($TIME, [$tb[1], $tb[2]]);
+                  break;
+                case "OTHER":
+                  array_push($OTHER, [$tb[1], $tb[2]]);
+                  break;
+              }
+              ?>
+                <tr>
+                  <td><?= $no++; ?></td>
+                  <td><?= $tb[0]; ?></td>
+                  <td>
+                    <?php
+                      foreach ($tb[1] as $o)
+                        echo $o;
+                      ?>
+                  </td>
+                  <td><?= $tb[2]; ?></td>
+                </tr>
+              <?php
+              }
+              ?>
+          </tbody>
+        </table>
+        <?php
+        $hasil = $praproses->formatSvm($ORGANIZATION, $PERSON);
+        // $hasil = $praproses->formatSvm($LOCATION, $PERSON);
+        $pelatihan = $svm->pelatihan($hasil[0], $hasil[1], 1, 0.00001, 5);
+        // echo count($OTHER);
+        print_r($pelatihan[0]);
+        ?>
+
     </section>
+
   </div>
   <script type="text/javascript" src="assets/dataTable/jquery.dataTables.min.js"></script>
   <script type="text/javascript" src="assets/dataTable/dataTables.bootstrap4.min.js"></script>
@@ -181,7 +199,7 @@ $praproses = new Praproses();
   <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
   <script>
     $(document).ready(function() {
-      $('#example').DataTable();
+      $('.example').DataTable();
     });
   </script>
 </body>

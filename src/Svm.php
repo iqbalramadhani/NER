@@ -292,6 +292,7 @@ class Svm
     public function predict($data)
     {
         $margs = $this->margins($data);
+        echo 'jumlah ' . count($margs);
         for ($i = 0; $i < count($margs); $i++) {
             $margs[$i] = $margs[$i] > 0 ? 1 : -1;
         }

@@ -2,252 +2,83 @@
 
 class Svm
 {
-  protected $alpha;
-  protected $b;
-  protected $D;
-  protected $data;
-  protected $kernel;
-  protected $kernelResults;
-  protected $kernelType;
-  protected $labels;
-  protected $N;
-  protected $usew_;
-  protected $w;
 
-  public function pelatihan($data, $labels, $options = [])
+  function pelatihan($data, $kelas, $C, $tol, $max_pass)
   {
-    // we need these in helper functions
-    $this->data = $data;
-    $this->labels = $labels;
-
-    // parameters
-    // C value. Decrease for more regularization
-    $C = array_key_exists('C', $options) ? $options['C'] : 1.0;
-    // numerical tolerance. Don't touch unless you're pro
-    $tol = array_key_exists('tol', $options) ? $options['tol'] : 1e-4;
-    // non-support vectors for space and time efficiency are truncated. To guarantee correct result set this to 0 to do no truncating. If you want to increase efficiency, experiment with setting this little higher, up to maybe 1e-4 or so.
-    $alphatol = array_key_exists('alphatol', $options) ? $options['alphatol'] : 1e-7;
-    // max number of iterations
-    $maxiter = array_key_exists('maxiter', $options) ? $options['maxiter'] : 10000;
-    // how many passes over data with no change before we halt? Increase for more precision.
-    $numpasses = array_key_exists('numpasses', $options) ? $options['numpasses'] : 20;
-
-    // print_r($kernel);
-    // die();
-
-    // instantiate kernel according to options. kernel can be given as string or as a custom function
-    $kernel = [$this, 'linearKernel'];
-    $this->kernelType = 'linear';
-
-    // print_r($this);
-    // die();
-
-    if (array_key_exists('kernel', $options)) {
-      if (is_string($options['kernel'])) {
-        // kernel was specified as a string. Handle these special cases appropriately
-        if ($options['kernel'] === 'linear') {
-          $kernel = [$this, 'linearKernel'];
-          $this->kernelType = 'linear';
-        }
-      }
-
-      if (is_callable($options['kernel'])) {
-        // assume kernel was specified as a function. Let's just use it
-        $kernel = $options['kernel'];
-        $this->kernelType = 'custom';
-      }
-    }
-
-    // initializations
-    $this->kernel = $kernel;
-    $this->N = $N = count($data);
-    $this->D = $D = count($data[0]);
-    $this->alpha = array_fill(0, $N, 0);
-    $this->b = 0.0;
-    $this->usew_ = false; // internal efficiency flag
-
-    // Cache kernel computations to avoid expensive recomputation.
-    // This could use too much memory if N is large.
-    if (array_key_exists('memoize', $options) && $options['memoize']) {
-      $this->kernelResults = array_fill(0, $N, []);
-
-      for ($i = 0; $i < $N; $i++) {
-        $this->kernelResults[$i] = array_fill(0, $N, []);
-
-        for ($j = 0; $j < $N; $j++) {
-          $this->kernelResults[$i][$j] = $kernel($data[$i], $data[$j]);
-        }
-      }
-    }
-
-    // print_r($this->kernel);
-    // die();
-
-    // run SMO algorithm
-    $iter = 0;
-    $passes = 0;
-
-    while ($passes < $numpasses && $iter < $maxiter) {
-      $alphaChanged = 0;
-
-      for ($i = 0; $i < $N; $i++) {
-        $Ei = $this->marginOne($data[$i]) - $labels[$i];
-
-        if (($labels[$i] * $Ei < -$tol && $this->alpha[$i] < $C)
-          || ($labels[$i] * $Ei > $tol && $this->alpha[$i] > 0)
-        ) {
-          // alpha_i needs updating! Pick a j to update it with
+    $b = 0.0;
+    $n = count($data);
+    $alpha = array_fill(0, $n, 0);
+    $pass = 0;
+    while ($pass < $max_pass) {
+      $ganti_alpha = 0;
+      for ($i = 0; $i < $n; $i++) {
+        $E1 = $this->f($alpha, $kelas, $b, $data, $data[$i]) - $kelas[$i];
+        // echo $E1;
+        if (($kelas[$i] * $E1 < -$tol && $alpha[$i] < $C) || ($kelas[$i] * $E1 > $tol && $alpha[$i] > 0)) {
           $j = $i;
-
-          while ($j === $i) {
-            $j = rand(0, $this->N - 1);
-          }
-
-          $Ej = $this->marginOne($data[$j]) - $labels[$j];
-
-          // calculate L and H bounds for j to ensure we're in [0 C]x[0 C] box
-          $ai = $this->alpha[$i];
-          $aj = $this->alpha[$j];
-          $L = 0;
-          $H = $C;
-
-          if ($labels[$i] === $labels[$j]) {
-            $L = max(0, $ai + $aj - $C);
-            $H = min($C, $ai + $aj);
+          while ($j === $i)
+            $j = rand(0, $n - 1);
+          $E2 = $this->f($alpha, $kelas, $b, $data, $data[$j]) - $kelas[$j];
+          $alphai_lama = $alpha[$i];
+          $alphaj_lama = $alpha[$j];
+          if ($kelas[$i] === $kelas[$j]) {
+            $L = max(0, $alphai_lama + $alphaj_lama - $C);
+            $H = min($C, $alphai_lama + $alphaj_lama);
           } else {
-            $L = max(0, $aj - $ai);
-            $H = min($C, $C + $aj - $ai);
+            $L = max(0, $alphaj_lama - $alphai_lama);
+            $H = min($C, $C + $alphaj_lama - $alphai_lama);
           }
-
-          if (abs($L - $H) < 1e-4) {
+          if ($L == $H)
+            continue;
+          $eta = 2 * $this->kernelLinier($data[$i], $data[$j]) - $this->kernelLinier($data[$i], $data[$i]) - $this->kernelLinier($data[$j], $data[$j]);
+          if ($eta >= 0)
+            continue;
+          $alphaj_baru = $alphaj_lama - (($kelas[$j] * ($E1 - $E2)) / $eta);
+          if ($alphaj_baru > $H) {
+            $alphaj_baru = $H;
+          }
+          if ($alphaj_baru < $L) {
+            $alphaj_baru = $L;
+          }
+          if (abs($alphaj_baru - $alphaj_lama) < 1e-5) {
             continue;
           }
-
-          $eta = 2 * $this->kernelResult($i, $j) - $this->kernelResult($i, $i) - $this->kernelResult($j, $j);
-
-          if ($eta >= 0) {
-            continue;
-          }
-
-          // compute new alpha_j and clip it inside [0 C]x[0 C] box
-          // then compute alpha_i based on it.
-          $newaj = $aj - (($labels[$j] * ($Ei - $Ej)) / $eta);
-
-          if ($newaj > $H) {
-            $newaj = $H;
-          }
-
-          if ($newaj < $L) {
-            $newaj = $L;
-          }
-
-          if (abs($aj - $newaj) < 1e-4) {
-            continue;
-          }
-
-          $this->alpha[$j] = $newaj;
-          $newai = $ai + $labels[$i] * $labels[$j] * ($aj - $newaj);
-          $this->alpha[$i] = $newai;
-
+          $alpha[$j] = $alphaj_baru;
+          $alphai_baru = $alphai_lama + $kelas[$i] * $kelas[$j] * ($alphaj_lama - $alphaj_baru);
+          $alpha[$i] = $alphai_baru;
           // update the bias term
-          $b1 = $this->b - $Ei - $labels[$i] * ($newai - $ai) * $this->kernelResult($i, $i)
-            - $labels[$j] * ($newaj - $aj) * $this->kernelResult($i, $j);
-
-          $b2 = $this->b - $Ej - $labels[$i] * ($newai - $ai) * $this->kernelResult($i, $j)
-            - $labels[$j] * ($newaj - $aj) * $this->kernelResult($j, $j);
-
-          $this->b = 0.5 * ($b1 + $b2);
-
-          if ($newai > 0 && $newai < $C) {
-            $this->b = $b1;
+          $b1 = $b - $E1 - $kelas[$i] * ($alphai_baru - $alphai_lama) * $this->kernelLinier($data[$i], $data[$i]) - $kelas[$j] * ($alphaj_baru - $alphaj_lama) * $this->kernelLinier($data[$i], $data[$j]);
+          $b2 = $b - $E2 - $kelas[$i] * ($alphai_baru - $alphai_lama) * $this->kernelLinier($data[$i], $data[$j]) - $kelas[$j] * ($alphaj_baru - $alphaj_lama) * $this->kernelLinier($data[$j], $data[$j]);
+          $b = 0.5 * ($b1 + $b2);
+          if ($alphai_baru > 0 && $alphai_baru < $C) {
+            $b = $b1;
           }
-
-          if ($newaj > 0 && $newaj < $C) {
-            $this->b = $b2;
+          if ($alphaj_baru > 0 && $alphaj_baru < $C) {
+            $b = $b2;
           }
-
-          $alphaChanged++;
-        }
-      }
-
-      $iter++;
-
-      //echo 'iter: ' . $iter . ' alphaChanged: ' . $alphaChanged . PHP_EOL;
-
-      //console.log("iter number %d, alphaChanged = %d", iter, alphaChanged);
-      $passes = ($alphaChanged == 0) ? $passes + 1 : 0;
-    }
-
-    $trainstats = [];
-    $trainstats['iters'] = $iter;
-
-    return $trainstats;
+          $ganti_alpha++;
+        } //endif
+      } //endfor
+      $pass = ($ganti_alpha == 0) ? $pass + 1 : 0;
+    } //endwhile
+    return [$alpha, $b];
   }
 
-  // inst is an array of length D. Returns margin of given example
-  // this is the core prediction function. All others are for convenience mostly
-  // and end up calling this one somehow.
-  protected function marginOne($inst)
+  public function f($alpha, $kelas, $b, $data, $vektor)
   {
-    $f = $this->b;
-
-    for ($i = 0; $i < $this->N; $i++) {
-      $kernel = $this->kernel;
-      $f += $this->alpha[$i] * $this->labels[$i] * $kernel($inst, $this->data[$i]);
+    $f = $b;
+    for ($i = 0; $i < count($data); $i++) {
+      $f += $alpha[$i] * $kelas[$i] * $this->kernelLinier($data[$i], $vektor);
     }
-
-
     return $f;
   }
 
-  public function predictOne($inst)
+  public function kernelLinier($v1, $v2)
   {
-    return $this->marginOne($inst) > 0 ? 1 : -1;
-  }
-
-  // data is an NxD array. Returns array of margins.
-  protected function margins($data)
-  {
-    // go over support vectors and accumulate the prediction.
-    $N = count($data);
-    // print_r($N);
-    $margins = array_fill(0, $N, 0);
-
-    for ($i = 0; $i < $N; $i++) {
-      $margins[$i] = $this->marginOne($data[$i]);
-    }
-
-    return $margins;
-  }
-
-  protected function kernelResult($i, $j)
-  {
-    if ($this->kernelResults) {
-      return $this->kernelResults[$i][$j];
-    }
-
-    $kernel = $this->kernel;
-
-    return $kernel($this->data[$i], $this->data[$j]);
-  }
-
-  // data is NxD array. Returns array of 1 or -1, predictions
-  public function prediksi($data)
-  {
-    $margs = $this->margins($data);
-    for ($i = 0; $i < count($margs); $i++) {
-      $margs[$i] = $margs[$i] > 0 ? 1 : -1;
-    }
-
-    return $margs;
-  }
-
-  protected function linearKernel($v1, $v2)
-  {
-    $s = 0;
+    $k = 0;
     for ($q = 0; $q < count($v1); $q++) {
-      $s += $v1[$q] * $v2[$q];
+      $k += $v1[$q] * $v2[$q];
     }
-    return $s;
+    return $k;
   }
 }
